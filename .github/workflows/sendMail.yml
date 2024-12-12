@@ -1,7 +1,10 @@
 name: Send Email Workflow
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Permet de déclencher manuellement
+  push:              # Déclenche le workflow lors d'un push
+    branches:
+      - main
 
 jobs:
   send_email:
@@ -16,11 +19,10 @@ jobs:
       with:
         server_address: smtp.gmail.com
         server_port: 465
-        account: ${{secrets.ACCOUNT}}
-        password: ${{secrets.MAIL_PASSWORD}}
-        sender: devellany
-        from: ${{secrets.MAIL_ADDRESS}}
-        to: waximum@gmx.com # Adresse du destinataire
+        username: ${{ secrets.ACCOUNT }}
+        password: ${{ secrets.MAIL_PASSWORD }}
+        from: ${{ secrets.MAIL_ADDRESS }}
+        to: waximum@gmx.com
         subject: "Mail title"
         body: "This is the body of the email."
         attachments: README.md
