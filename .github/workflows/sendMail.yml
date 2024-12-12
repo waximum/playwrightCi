@@ -1,28 +1,58 @@
 name: Send Email Workflow
+# Le nom du workflow. Ce sera visible dans l'onglet "Actions" de votre dépôt GitHub.
 
 on:
-  workflow_dispatch: # Permet de déclencher manuellement
-  push:              # Déclenche le workflow lors d'un push
-    branches:
-      - main
+  workflow_dispatch: # Permet de déclencher manuellement ce workflow depuis l'interface GitHub Actions.
+  push:              # Déclenche automatiquement le workflow à chaque push.
+    branches:        # Spécifie les branches sur lesquelles ce workflow sera déclenché.
+      - main         # Ici, cela se déclenche uniquement sur la branche "main".
 
-jobs:
-  send_email:
+jobs: # Décrit les différents jobs que GitHub Actions doit exécuter.
+  send_email: # Nom du job, ici "send_email".
     runs-on: ubuntu-latest
+    # Spécifie le système d'exploitation sur lequel le job sera exécuté. 
+    # "ubuntu-latest" est une image Ubuntu mise à jour par GitHub.
 
-    steps:
+    steps: # Liste des étapes à exécuter dans ce job.
     - name: Checkout code
       uses: actions/checkout@v4
+      # Première étape : récupère le code source du dépôt.
+      # "actions/checkout@v4" est une action GitHub standard pour cloner le dépôt dans l'environnement.
 
     - name: Send Email
       uses: dawidd6/action-send-mail@v3
-      with:
+      # Utilise l'action "dawidd6/action-send-mail" pour envoyer un e-mail.
+      # Cette action simplifie l'envoi d'e-mails via un serveur SMTP.
+
+      with: # Paramètres nécessaires pour configurer l'envoi d'e-mails.
         server_address: smtp.gmail.com
+        # L'adresse du serveur SMTP utilisé. Ici, c'est celui de Gmail.
+
         server_port: 465
+        # Le port utilisé pour le protocole SMTP sécurisé (SSL).
+
         username: ${{ secrets.ACCOUNT }}
+        # Nom d'utilisateur pour l'authentification. Ici, il est récupéré depuis un secret GitHub.
+        # Le secret "ACCOUNT" doit contenir votre adresse e-mail complète.
+
         password: ${{ secrets.MAIL_PASSWORD }}
-        from: adebola
+        # Mot de passe utilisé pour l'authentification.
+        # Si vous utilisez Gmail avec la vérification en deux étapes activée, 
+        # ce doit être un mot de passe d'application généré.
+
+        from: ${{ secrets.ACCOUNT }}
+        # Adresse ou nom affiché dans le champ "De" de l'e-mail.
+        # Si vous voulez que cela corresponde à votre adresse e-mail, remplacez par `${{ secrets.ACCOUNT }}`.
+
         to: waximum@gmx.com
-        subject: "Mail title"
+        # Adresse e-mail du destinataire.
+
+        subject: "Mail venant de la CI GitHub"
+        # Le sujet de l'e-mail.
+
         body: "This is the body of the email."
+        # Le contenu textuel de l'e-mail.
+
         attachments: README.md
+        # Un fichier joint à l'e-mail. Ici, c'est "README.md".
+        # Assurez-vous que ce fichier existe dans votre dépôt et dans le répertoire courant.
