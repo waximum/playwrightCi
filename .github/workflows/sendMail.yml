@@ -2,8 +2,7 @@ name: Send Email Workflow
 # Le nom du workflow. Ce sera visible dans l'onglet "Actions" de votre dépôt GitHub.
 
 on:
-  workflow_dispatch: # Permet de déclencher manuellement ce workflow depuis l'interface GitHub Actions.
-  push:              # Déclenche automatiquement le workflow à chaque push.
+  workflow_dispatch: # Permet de déclencher manuellement ce workflow depuis l'interface GitHub Actions.              # Déclenche automatiquement le workflow à chaque push.
     branches:        # Spécifie les branches sur lesquelles ce workflow sera déclenché.
       - main         # Ici, cela se déclenche uniquement sur la branche "main".
 
