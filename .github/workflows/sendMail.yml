@@ -37,7 +37,7 @@ jobs: # Décrit les différents jobs que GitHub Actions doit exécuter.
         password: ${{ secrets.MAIL_PASSWORD }}
         # Mot de passe utilisé pour l'authentification.
         # Si vous utilisez Gmail avec la vérification en deux étapes activée, 
-        # ce doit être un mot de passe d'application généré.
+        # ce doit être un mot de passe d'application généré..
 
         from: ${{ secrets.ACCOUNT }}
         # Adresse ou nom affiché dans le champ "De" de l'e-mail.
