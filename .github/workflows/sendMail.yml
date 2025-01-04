@@ -10,7 +10,7 @@ jobs: # Décrit les différents jobs que GitHub Actions doit exécuter.
   send_email: # Nom du job, ici "send_email".
     runs-on: ubuntu-latest
     # Spécifie le système d'exploitation sur lequel le job sera exécuté. 
-    # "ubuntu-latest" est une image Ubuntu mise à jour par GitHub.
+    # "ubuntu-latest" est une image Ubuntu mise à jour par GitHub..
 
     steps: # Liste des étapes à exécuter dans ce job.
     - name: Checkout code

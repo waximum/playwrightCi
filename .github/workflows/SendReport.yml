@@ -4,8 +4,7 @@ on:
   workflow_dispatch: # Permet de déclencher manuellement
   schedule:
     - cron: '22 11 * * *' # Exécute à 11h22 UTC chaque jour (12h22 CET en hiver)
-  push:
-    branches: [ main, master ]
+  
   pull_request:
     branches: [ main, master ]
 

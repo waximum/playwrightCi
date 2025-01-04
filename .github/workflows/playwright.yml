@@ -3,8 +3,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '22 11 * * *' # Exécute à 11h20 UTC chaque jour (correspond à 12h20 CET en hiver)
-  push:
-    branches: [ main, master ]
+
   pull_request:
     branches: [ main, master ]
 jobs:
