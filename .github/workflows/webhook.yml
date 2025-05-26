@@ -17,9 +17,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: lts/*
 
@@ -42,38 +44,45 @@ jobs:
 
       - name: Notify Microsoft Teams (via curl)
         if: always()
+        env:
+          TEAMS_WEBHOOK: ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
         run: |
           status="${{ job.status }}"
-          color="FFA500" # orange par défaut
+          color="FFA500" # Orange par défaut
           emoji="🟠"
           if [ "$status" = "success" ]; then
-            color="00FF00" # vert
+            color="00FF00"
             emoji="✅"
           elif [ "$status" = "failure" ]; then
-            color="FF0000" # rouge
+            color="FF0000"
             emoji="❌"
           fi
 
-          curl -H 'Content-Type: application/json' -d "{
-            \"@type\": \"MessageCard\",
-            \"@context\": \"https://schema.org/extensions\",
-            \"themeColor\": \"$color\",
-            \"summary\": \"Playwright Test Result\",
-            \"sections\": [{
-              \"activityTitle\": \"$emoji Playwright Tests - $status\",
-              \"facts\": [
-                { \"name\": \"Repo:\", \"value\": \"${{ github.repository }}\" },
-                { \"name\": \"Branch:\", \"value\": \"${{ github.ref_name }}\" },
-                { \"name\": \"Actor:\", \"value\": \"${{ github.actor }}\" },
-                { \"name\": \"Status:\", \"value\": \"$status\" }
-              ],
-              \"markdown\": true
-            }],
-            \"potentialAction\": [{
-              \"@type\": \"OpenUri\",
-              \"name\": \"Voir les logs GitHub Actions\",
-              \"targets\": [
-                { \"os\": \"default\", \"uri\": \"https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\" }
-              ]
-            }]
-          }" ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
+          json=$(cat <<EOF
+{
+  "@type": "MessageCard",
+  "@context": "https://schema.org/extensions",
+  "themeColor": "$color",
+  "summary": "Résultat des tests Playwright",
+  "sections": [{
+    "activityTitle": "$emoji Playwright Tests – $status",
+    "facts": [
+      { "name": "📦 Repository", "value": "$GITHUB_REPOSITORY" },
+      { "name": "🔁 Branch", "value": "$GITHUB_REF_NAME" },
+      { "name": "👤 Déclenché par", "value": "$GITHUB_ACTOR" },
+      { "name": "📊 Statut", "value": "$status" }
+    ],
+    "markdown": true
+  }],
+  "potentialAction": [{
+    "@type": "OpenUri",
+    "name": "Voir le workflow GitHub",
+    "targets": [
+      { "os": "default", "uri": "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" }
+    ]
+  }]
+}
+EOF
+)
+
+          curl -H "Content-Type: application/json" -d "$json" "$TEAMS_WEBHOOK"
