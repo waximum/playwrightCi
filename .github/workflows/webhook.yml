@@ -45,7 +45,7 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-      - name: Notify Microsoft Teams (via curl)
+      - name: Notify Microsoft Teams (no cat <<EOF)
         if: always()
         env:
           TEAMS_WEBHOOK: ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
@@ -53,7 +53,6 @@ jobs:
           status="${{ job.status }}"
           color="FFA500"
           emoji="🟠"
-
           if [ "$status" = "success" ]; then
             color="00FF00"
             emoji="✅"
@@ -62,41 +61,28 @@ jobs:
             emoji="❌"
           fi
 
-          json=$(cat <<'EOF'
-{
-  "@type": "MessageCard",
-  "@context": "https://schema.org/extensions",
-  "themeColor": "__COLOR__",
-  "summary": "Résultat des tests Playwright",
-  "sections": [{
-    "activityTitle": "__EMOJI__ Playwright Tests – __STATUS__",
-    "facts": [
-      { "name": "📦 Repository", "value": "__REPO__" },
-      { "name": "🔁 Branch", "value": "__BRANCH__" },
-      { "name": "👤 Déclenché par", "value": "__ACTOR__" },
-      { "name": "📊 Statut", "value": "__STATUS__" }
-    ],
-    "markdown": true
-  }],
-  "potentialAction": [{
-    "@type": "OpenUri",
-    "name": "Voir le workflow GitHub",
-    "targets": [
-      { "os": "default", "uri": "__URL__" }
-    ]
-  }]
-}
-EOF
-)
+          json="{"
+          json="$json\"@type\": \"MessageCard\","
+          json="$json\"@context\": \"https://schema.org/extensions\","
+          json="$json\"themeColor\": \"$color\","
+          json="$json\"summary\": \"Résultat des tests Playwright\","
+          json="$json\"sections\": [{"
+          json="$json\"activityTitle\": \"$emoji Playwright Tests – $status\","
+          json="$json\"facts\": ["
+          json="$json{ \"name\": \"📦 Repository\", \"value\": \"$GITHUB_REPOSITORY\" },"
+          json="$json{ \"name\": \"🔁 Branch\", \"value\": \"$GITHUB_REF_NAME\" },"
+          json="$json{ \"name\": \"👤 Déclenché par\", \"value\": \"$GITHUB_ACTOR\" },"
+          json="$json{ \"name\": \"📊 Statut\", \"value\": \"$status\" }"
+          json="$json],"
+          json="$json\"markdown\": true"
+          json="$json}],"
+          json="$json\"potentialAction\": [{"
+          json="$json\"@type\": \"OpenUri\","
+          json="$json\"name\": \"Voir le workflow GitHub\","
+          json="$json\"targets\": ["
+          json="$json{ \"os\": \"default\", \"uri\": \"https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\" }"
+          json="$json]"
+          json="$json}]"
+          json="$json}"
 
-          # Injection des vraies valeurs
-          json="${json/__COLOR__/$color}"
-          json="${json/__EMOJI__/$emoji}"
-          json="${json/__STATUS__/$status}"
-          json="${json/__REPO__/$GITHUB_REPOSITORY}"
-          json="${json/__BRANCH__/$GITHUB_REF_NAME}"
-          json="${json/__ACTOR__/$GITHUB_ACTOR}"
-          json="${json/__URL__/https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID}"
-
-          echo "📤 Envoi vers Microsoft Teams..."
           curl -H "Content-Type: application/json" -d "$json" "$TEAMS_WEBHOOK"
