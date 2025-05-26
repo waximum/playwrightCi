@@ -45,7 +45,7 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-      - name: Notify Microsoft Teams (via curl)
+            - name: Notify Microsoft Teams (via curl)
         if: always()
         env:
           TEAMS_WEBHOOK: ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
@@ -88,4 +88,5 @@ jobs:
 EOF
 )
 
+          echo "📤 Envoi de la notification à Teams..."
           curl -H "Content-Type: application/json" -d "$json" "$TEAMS_WEBHOOK"
