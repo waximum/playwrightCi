@@ -62,19 +62,19 @@ jobs:
             emoji="❌"
           fi
 
-          json=$(cat <<EOF
+          json=$(cat <<'EOF'
 {
   "@type": "MessageCard",
   "@context": "https://schema.org/extensions",
-  "themeColor": "$color",
+  "themeColor": "__COLOR__",
   "summary": "Résultat des tests Playwright",
   "sections": [{
-    "activityTitle": "$emoji Playwright Tests – $status",
+    "activityTitle": "__EMOJI__ Playwright Tests – __STATUS__",
     "facts": [
-      { "name": "📦 Repository", "value": "$GITHUB_REPOSITORY" },
-      { "name": "🔁 Branch", "value": "$GITHUB_REF_NAME" },
-      { "name": "👤 Déclenché par", "value": "$GITHUB_ACTOR" },
-      { "name": "📊 Statut", "value": "$status" }
+      { "name": "📦 Repository", "value": "__REPO__" },
+      { "name": "🔁 Branch", "value": "__BRANCH__" },
+      { "name": "👤 Déclenché par", "value": "__ACTOR__" },
+      { "name": "📊 Statut", "value": "__STATUS__" }
     ],
     "markdown": true
   }],
@@ -82,11 +82,21 @@ jobs:
     "@type": "OpenUri",
     "name": "Voir le workflow GitHub",
     "targets": [
-      { "os": "default", "uri": "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" }
+      { "os": "default", "uri": "__URL__" }
     ]
   }]
 }
 EOF
 )
 
+          # Injection des vraies valeurs
+          json="${json/__COLOR__/$color}"
+          json="${json/__EMOJI__/$emoji}"
+          json="${json/__STATUS__/$status}"
+          json="${json/__REPO__/$GITHUB_REPOSITORY}"
+          json="${json/__BRANCH__/$GITHUB_REF_NAME}"
+          json="${json/__ACTOR__/$GITHUB_ACTOR}"
+          json="${json/__URL__/https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID}"
+
+          echo "📤 Envoi vers Microsoft Teams..."
           curl -H "Content-Type: application/json" -d "$json" "$TEAMS_WEBHOOK"
