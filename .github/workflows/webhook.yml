@@ -1,9 +1,15 @@
 name: Playwright Tests
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   test:
@@ -36,7 +42,7 @@ jobs:
 
       - name: Notify MS Teams
         uses: opsless/ms-teams-github-actions@main
-        if: always() # s'exécute même si les tests échouent
+        if: always()
         with:
           github-token: ${{ github.token }}
           webhook-uri: ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
