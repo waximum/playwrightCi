@@ -40,16 +40,40 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-      - name: Send notification to MS Teams
+      - name: Notify Microsoft Teams (via curl)
         if: always()
-        uses: atcierra/ms-teams-notification@v1.3
-        with:
-          webhook: ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
-          title: |
-            🎭 Playwright Tests ${{ job.status == 'success' && '✅ SUCCEEDED' || '❌ FAILED' }}
-          text: |
-            - 📦 Repo: ${{ github.repository }}
-            - 🔁 Branch: ${{ github.ref_name }}
-            - 🧪 Status: ${{ job.status }}
-            - 👤 By: ${{ github.actor }}
-            - 🔗 [Voir l'exécution](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+        run: |
+          status="${{ job.status }}"
+          color="FFA500" # orange par défaut
+          emoji="🟠"
+          if [ "$status" = "success" ]; then
+            color="00FF00" # vert
+            emoji="✅"
+          elif [ "$status" = "failure" ]; then
+            color="FF0000" # rouge
+            emoji="❌"
+          fi
+
+          curl -H 'Content-Type: application/json' -d "{
+            \"@type\": \"MessageCard\",
+            \"@context\": \"https://schema.org/extensions\",
+            \"themeColor\": \"$color\",
+            \"summary\": \"Playwright Test Result\",
+            \"sections\": [{
+              \"activityTitle\": \"$emoji Playwright Tests - $status\",
+              \"facts\": [
+                { \"name\": \"Repo:\", \"value\": \"${{ github.repository }}\" },
+                { \"name\": \"Branch:\", \"value\": \"${{ github.ref_name }}\" },
+                { \"name\": \"Actor:\", \"value\": \"${{ github.actor }}\" },
+                { \"name\": \"Status:\", \"value\": \"$status\" }
+              ],
+              \"markdown\": true
+            }],
+            \"potentialAction\": [{
+              \"@type\": \"OpenUri\",
+              \"name\": \"Voir les logs GitHub Actions\",
+              \"targets\": [
+                { \"os\": \"default\", \"uri\": \"https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\" }
+              ]
+            }]
+          }" ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
